@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from aiogram import types, F, Router
 from aiogram.fsm.context import FSMContext
@@ -6,11 +7,9 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.enums import ParseMode
 
-
 import config
 import states
 import text
-from handlers.registration import registration
 from states import Registration, Work
 
 db = config.db
@@ -28,11 +27,12 @@ async def get_current_state(msg: types.Message, state: FSMContext):
 
 @router.message(Command("start"))
 async def start(msg: Message, state: FSMContext):
+    logging.info("Command /start received in main_menu")
     await state.clear()
     if not db.user_exists(msg.from_user.id):
         db.add_user(msg.from_user.id)
         db.set_tgtag(msg.from_user.id, msg.from_user.username)
-        await  msg.answer(text='\n'.join(text.invite_msg), parse_mode=ParseMode.HTML, reply_markup=types.ReplyKeyboardRemove())
+        await msg.answer(text='\n'.join(text.invite_msg), parse_mode=ParseMode.HTML, reply_markup=types.ReplyKeyboardRemove())
         await state.set_state(Registration.user_key)
     elif db.get_signup(msg.from_user.id) == "setname":
         await state.set_state(Registration.user_key)
@@ -45,7 +45,6 @@ async def start(msg: Message, state: FSMContext):
 async def admin(msg: Message, state: FSMContext):
     await msg.answer(f"Добро пожаловать в меню администратора!", parse_mode=ParseMode.HTML, reply_markup=kb.admin_menu)
     await state.set_state(states.AdminMenu.admin)
-
 
 @router.message(Work.main_state)
 async def set_name(msg: Message, state: FSMContext):

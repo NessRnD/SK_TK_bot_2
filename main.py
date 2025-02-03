@@ -10,7 +10,6 @@ from aiogram.client.bot import DefaultBotProperties
 import config
 from handlers import main_menu, admin_menu, registration
 
-
 async def on_startup(bot: Bot):
     await bot.set_my_commands([
         BotCommand(command="/start", description="Начать"),
@@ -22,9 +21,9 @@ async def on_startup(bot: Bot):
 async def main():
     bot = Bot(token=config.BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher(storage=MemoryStorage())
+    dp.include_router(registration.reg_router)  # Регистрируем роутер для регистрации первым
     dp.include_router(main_menu.router)
     dp.include_router(admin_menu.router)
-    dp.include_router(registration.reg_router)
     dp.startup.register(on_startup)
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
