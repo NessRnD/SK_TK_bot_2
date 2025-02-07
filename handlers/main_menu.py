@@ -50,8 +50,13 @@ async def admin(msg: Message, state: FSMContext):
 async def set_name(msg: Message, state: FSMContext):
     if db.user_exists(msg.from_user.id):
         if msg.text == 'Получить номер предписания':
-            answer = "Ваш номер предписания: №" + str(config.counter.new_value())
-            config.save(str(config.counter.get_value()))
+            old_number = config.counter.get_value()
+            new_number = config.counter.new_value()
+            logging.info(old_number)
+            logging.info(new_number)
+            answer = "Ваш номер предписания: №" + str(new_number)
+
+            config.save_number(str(config.counter.get_value()))
             file_l = open('user_log.txt', "a+", encoding="utf-8")
             file_l.write('Номер:' + str(config.counter.get_value()) +
                          '  ' + 'Взял:' + db.get_name(msg.from_user.id) +

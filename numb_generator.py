@@ -6,6 +6,7 @@ class increment_counter:
     def new_value(self):
         self._value += 1
         return self._value
+
     def delete_value(self):
         if self._value > 0:
             self._value -= 1
