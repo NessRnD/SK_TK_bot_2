@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-from aiogram import Router
+from aiogram import Router, types
 from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
@@ -10,15 +10,26 @@ from aiogram import F
 
 import config
 import kb
+import text
 from states import Registration, Work
 
 reg_router = Router()
 
 @reg_router.message(Command(commands=["start"]))
 async def cmd_start(msg: Message, state: FSMContext):
-    logging.info("Command /start received")
-    await msg.answer('<b>Введите кодовое слово:</b>', parse_mode=ParseMode.HTML)
-    await state.set_state(Registration.user_key)
+    logging.info("Command /start received in registration")
+    if not config.db.user_exists(msg.from_user.id):
+        logging.info(f"user not exist")
+        config.db.add_user(msg.from_user.id)
+        config.db.set_tgtag(msg.from_user.id, msg.from_user.username)
+        await msg.answer(text='\n'.join(text.invite_msg), parse_mode=ParseMode.HTML, reply_markup=types.ReplyKeyboardRemove())
+        await state.set_state(Registration.user_key)
+    elif config.db.get_signup(msg.from_user.id) == "setname":
+        await msg.answer(text='\n'.join(text.key_query), parse_mode=ParseMode.HTML)
+        await state.set_state(Registration.user_key)
+    else:
+        await msg.answer("<b>Главное меню</b>", parse_mode=ParseMode.HTML, reply_markup=kb.main_menu)
+        await state.set_state(Work.main_state)
 
 @reg_router.message(Registration.user_key, F.text)
 async def registration(msg: Message, state: FSMContext):

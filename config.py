@@ -1,4 +1,7 @@
 import os
+from datetime import date, timedelta
+import re
+
 from numb_generator import increment_counter
 
 from db import database
@@ -21,6 +24,10 @@ def save_number(x):
     f.write(x)
     f.close()
 
+def get_date(days_ago=0):
+    today = date.today()
+    target_date = today - timedelta(days=days_ago)
+    return target_date.strftime("%d.%m.%Y")
 
 
 def load_number():
@@ -32,6 +39,13 @@ def load_number():
         return 0
     except ValueError:
         return 0
+
+def check_six_digit_number(message):
+    match = re.search(r'\b\d{6}\b', message)  # Ищем шестизначное число, окруженное границами слов
+    if match:
+        return int(match.group(0))  # Преобразуем найденное число в целое
+    else:
+        return 0  # Возвращаем 0, если число не найдено
 
 counter = increment_counter()
 counter.set_value(load_number())

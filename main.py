@@ -10,6 +10,7 @@ from aiogram.client.bot import DefaultBotProperties
 import config
 from handlers import main_menu, admin_menu, registration
 
+
 async def on_startup(bot: Bot):
     await bot.set_my_commands([
         BotCommand(command="/start", description="Начать"),
